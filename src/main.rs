@@ -3,11 +3,37 @@ extern crate nom;
 
 use nom::{IResult,digit};
 
-// Parser definition
-
 use std::io;
 use std::str;
 use std::str::FromStr;
+
+// Expr Definition
+
+enum Expr {
+    BinOp(Box<Expr>, BinOp, Box<Expr>),
+    Literal(isize),
+}
+
+enum BinOp {
+    Plus,
+    Minus,
+    Times,
+    Over,
+}
+
+impl Expr {
+    fn evaluate(&self) -> isize {
+        unimplemented!()
+    }
+    fn operation_count(&self) -> usize {
+        unimplemented!()
+    }
+    fn depth(&self) -> usize {
+        unimplemented!()
+    }
+}
+
+// Parser definition
 
 named!(parens<i64>, delimited!(
     char!('('),
