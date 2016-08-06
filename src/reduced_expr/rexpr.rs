@@ -5,7 +5,7 @@
 // +,-,*,/, in terms of Addition, Multiplication, Negation, and Reciprocal
 
 pub enum RExpr {
-    UnOp(UnOp, Box<RExpr>),
+    Negation(Box<RExpr>),
     BinOp(Box<RExpr>, BinOp, Box<RExpr>),
     Literal(isize),
 }
@@ -13,11 +13,7 @@ pub enum RExpr {
 pub enum BinOp {
     Plus,
     Times,
-}
-
-pub enum UnOp {
-    Negate,
-    Reciprocal,
+    Over,
 }
 
 impl RExpr {
