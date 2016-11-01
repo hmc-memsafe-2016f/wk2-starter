@@ -15,5 +15,5 @@ name = "stat"
 path = "src/stat.rs"
 
 [[bin]]
-name = "rexpr"
+name = "rstat"
 path = "src/rexpr.rs"
