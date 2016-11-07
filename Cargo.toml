@@ -1,7 +1,7 @@
 [package]
 name = "wk2-starter"
 version = "0.1.0"
-authors = ["Alex Ozdemir <aozdemir@hmc.edu>"]
+authors = ["Adam Dunlap <adunlap@hmc.edu>"]
 
 [dependencies]
 nom = "^1.2.4"
@@ -9,3 +9,7 @@ nom = "^1.2.4"
 [[bin]]
 name = "repl"
 path = "src/repl.rs"
+
+[[bin]]
+name = "stat"
+path = "src/stat.rs"
