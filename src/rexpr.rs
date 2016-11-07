@@ -1,4 +1,4 @@
-// Alex Ozdemir <aozdemir@hmc.edu> // <- Your name should replace this line!
+// Ross Mawhorter <rmawhorter@g.hmc.edu>
 // Starter code for HMC's MemorySafe, week 2
 //
 // The definition of `RExpr` (ReducedExpr), a type that represents arithmetic expressions involving
