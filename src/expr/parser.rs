@@ -37,6 +37,11 @@ named!(factor<Expr>,
   )
 );
 
+fn lambda_y(acc: &mut Expr, op: BinOp, e: Expr) {
+    let tmp = mem::replace(acc, Expr::Literal(0));
+    mem::replace(acc, Expr::BinOp(Box::new(tmp), op, Box::new(e)));
+}
+
 // we define acc as mutable to update its value whenever a new term is found
 named!(term <Expr>,
   chain!(
@@ -45,16 +50,10 @@ named!(term <Expr>,
                alt!(
                  map!(
                      preceded!(tag!("*"), factor),
-                     |e: Expr| {
-                         let tmp = mem::replace(&mut acc, Expr::Literal(0));
-                         mem::replace(&mut acc, Expr::BinOp(Box::new(tmp), BinOp::Times, Box::new(e)));
-                     }) |
+                     |e: Expr| lambda_y(&mut acc, BinOp::Times, e)) |
                  map!(
                      preceded!(tag!("/"), factor),
-                     |e: Expr| {
-                         let tmp = mem::replace(&mut acc, Expr::Literal(0));
-                         mem::replace(&mut acc, Expr::BinOp(Box::new(tmp), BinOp::Over, Box::new(e)));
-                     })
+                     |e: Expr| lambda_y(&mut acc, BinOp::Over, e))
                )
              ),
     || { return acc }
@@ -68,16 +67,10 @@ named!(pub expr <Expr>,
                alt!(
                  map!(
                      preceded!(tag!("+"), factor),
-                     |e: Expr| {
-                         let tmp = mem::replace(&mut acc, Expr::Literal(0));
-                         mem::replace(&mut acc, Expr::BinOp(Box::new(tmp), BinOp::Plus, Box::new(e)));
-                     }) |
+                     |e: Expr| lambda_y(&mut acc, BinOp::Plus, e)) |
                  map!(
                      preceded!(tag!("-"), term),
-                     |e: Expr| {
-                         let tmp = mem::replace(&mut acc, Expr::Literal(0));
-                         mem::replace(&mut acc, Expr::BinOp(Box::new(tmp), BinOp::Minus, Box::new(e)));
-                     })
+                     |e: Expr| lambda_y(&mut acc, BinOp::Minus, e))
                )
              ),
     || { return acc }
