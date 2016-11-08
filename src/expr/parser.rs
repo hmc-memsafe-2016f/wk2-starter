@@ -44,8 +44,12 @@ named!(term <Expr>,
     mut acc: factor  ~
              many0!(
                alt!(
-                 map!(preceded!(tag!("*"), factor), |mul| acc = Expr::BinOp(Box::new(mem::replace(&mut acc, Expr::Literal(0))), BinOp::Times, Box::new(mul))) |
-                 map!(preceded!(tag!("/"), factor), |div| acc = Expr::BinOp(Box::new(mem::replace(&mut acc, Expr::Literal(0))), BinOp::Over, Box::new(div)))
+                 map!(preceded!(tag!("*"), factor), |mul| acc = 
+                    Expr::BinOp(Box::new(mem::replace(&mut acc, Expr::Literal(0)))
+                                , BinOp::Times, Box::new(mul))) |
+                 map!(preceded!(tag!("/"), factor), |div| acc = 
+                    Expr::BinOp(Box::new(mem::replace(&mut acc, Expr::Literal(0)))
+                                , BinOp::Over, Box::new(div)))
                )
              ),
     || { return acc }
@@ -57,8 +61,12 @@ named!(pub expr <Expr>,
     mut acc: term  ~
              many0!(
                alt!(
-                 map!(preceded!(tag!("+"), term), |add| acc = Expr::BinOp(Box::new(mem::replace(&mut acc, Expr::Literal(0))), BinOp::Plus, Box::new(add))) |
-                 map!(preceded!(tag!("-"), term), |sub| acc = Expr::BinOp(Box::new(mem::replace(&mut acc, Expr::Literal(0))), BinOp::Minus, Box::new(sub)))
+                 map!(preceded!(tag!("+"), term), |add| acc = 
+                    Expr::BinOp(Box::new(mem::replace(&mut acc, Expr::Literal(0)))
+                                , BinOp::Plus, Box::new(add))) |
+                 map!(preceded!(tag!("-"), term), |sub| acc = 
+                    Expr::BinOp(Box::new(mem::replace(&mut acc, Expr::Literal(0)))
+                                , BinOp::Minus, Box::new(sub)))
                )
              ),
     || { return acc }
