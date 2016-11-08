@@ -31,7 +31,7 @@ impl Expr {
                     &BinOp::Plus => expr1.evaluate() + expr2.evaluate(),
                     &BinOp::Minus => expr1.evaluate() - expr2.evaluate(),
                     &BinOp::Times => expr1.evaluate() * expr2.evaluate(),
-                    &BinOp::Over => expr2.evaluate() / expr2.evaluate(),
+                    &BinOp::Over => expr1.evaluate() / expr2.evaluate(),
                 }
             },
             &Expr::Literal(value) => value,
@@ -43,7 +43,7 @@ impl Expr {
     pub fn operation_count(&self) -> usize {
         match self
         {
-            &Expr::BinOp(ref expr1, ref op, ref expr2) =>
+            &Expr::BinOp(ref expr1, _, ref expr2) =>
             {
                 1 + expr1.operation_count() + expr2.operation_count()
             },
@@ -58,7 +58,7 @@ impl Expr {
         {
             &Expr::BinOp(ref expr1, _, ref expr2) =>
             {
-                cmp::max(expr1.depth(), expr2.depth())
+                1 + cmp::max(expr1.depth(), expr2.depth())
             },
             &Expr::Literal(_) => 0
         }

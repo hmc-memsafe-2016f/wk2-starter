@@ -11,6 +11,8 @@ use std::str::FromStr;
 use super::Expr;
 use super::BinOp;
 
+use std::mem;
+
 named!(parens<Expr>, delimited!(
     char!('('),
     expr,
@@ -58,8 +60,14 @@ named!(term <Expr>,
     mut acc: factor  ~
              many0!(
                alt!(
-                 tap!(mul: preceded!(tag!("*"), factor) => acc = Expr::BinOp(Box::new(acc), BinOp::Times, Box::new(mul))) |
-                 tap!(div: preceded!(tag!("/"), factor) => acc = Expr::BinOp(Box::new(acc), BinOp::Over, Box::new(div)))
+                 map!(preceded!(tag!("*"), factor), |mul| {
+                                                            let acc_expr = mem::replace(&mut acc, Expr::Literal(0));
+                                                            acc = Expr::BinOp(Box::new(acc_expr), BinOp::Times, Box::new(mul))
+                                                          })|
+                 map!(preceded!(tag!("/"), factor), |div| {
+                                                            let acc_expr = mem::replace(&mut acc, Expr::Literal(0));
+                                                            acc = Expr::BinOp(Box::new(acc_expr), BinOp::Over, Box::new(div))
+                                                          })
                )
              ),
     || { return acc }
@@ -71,8 +79,14 @@ named!(pub expr <Expr>,
     mut acc: term  ~
              many0!(
                alt!(
-                 tap!(add: preceded!(tag!("+"), term) => acc = Expr::BinOp(Box::new(acc), BinOp::Plus, Box::new(add))) |
-                 tap!(sub: preceded!(tag!("-"), term) => acc = Expr::BinOp(Box::new(acc), BinOp::Minus, Box::new(sub)))
+                 map!(preceded!(tag!("+"), term), |add| {
+                                                          let acc_expr = mem::replace(&mut acc, Expr::Literal(0));
+                                                          acc = Expr::BinOp(Box::new(acc_expr), BinOp::Plus, Box::new(add))
+                                                        })|
+                 map!(preceded!(tag!("-"), term), |sub| {
+                                                          let acc_expr = mem::replace(&mut acc, Expr::Literal(0));
+                                                          acc = Expr::BinOp(Box::new(acc_expr), BinOp::Minus, Box::new(sub))
+                                                        })
                )
              ),
     || { return acc }
