@@ -60,7 +60,7 @@ impl Expr {
     /// For example, `1+4-5` has two operations.
     pub fn operation_count(&self) -> usize {
         match self {
-            &Expr::BinOp(ref left, ref operation, ref right) => 1 + left.operation_count() + right.operation_count(),
+            &Expr::BinOp(ref left, _, ref right) => 1 + left.operation_count() + right.operation_count(),
             &Expr::Literal(_) => 0
         }
     }
@@ -69,7 +69,7 @@ impl Expr {
     /// `1` has depth 0, `1+3` has depth 1, and `1+4*3` has depth 2
     pub fn depth(&self) -> usize {
         match self {
-            &Expr::BinOp(ref left, ref operation, ref right) => 1 + cmp::max(left.depth(), right.depth()),
+            &Expr::BinOp(ref left, _, ref right) => 1 + cmp::max(left.depth(), right.depth()),
             &Expr::Literal(_) => 0
         }
     }
