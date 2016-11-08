@@ -50,16 +50,10 @@ named!(term <Expr>,
                alt!(
                  map!(
                      preceded!(tag!("*"), factor),
-                     |e: Expr| {
-                        println!("factor e * {}", e);
-                        println!("factor acc * {}", acc);
-                         lambda_y(&mut acc, BinOp::Times, e)
-                     }) |
+                     |e: Expr| lambda_y(&mut acc, BinOp::Times, e)) |
                  map!(
                      preceded!(tag!("/"), factor),
-                     |e: Expr| {
-                        println!("factor e / {}", e);
-                        println!("factor acc / {}", acc);lambda_y(&mut acc, BinOp::Over, e)})
+                     |e: Expr| lambda_y(&mut acc, BinOp::Over, e))
                )
              ),
     || { return acc }
@@ -72,15 +66,11 @@ named!(pub expr <Expr>,
              many0!(
                alt!(
                  map!(
-                     preceded!(tag!("+"), factor),
-                     |e: Expr| {
-                        println!("expr e + {}", e);
-                        println!("expr acc + {}", acc);lambda_y(&mut acc, BinOp::Plus, e)}) |
+                     preceded!(tag!("+"), term),
+                     |e: Expr| lambda_y(&mut acc, BinOp::Plus, e)) |
                  map!(
                      preceded!(tag!("-"), term),
-                     |e: Expr| {
-                        println!("expr e - {}", e);
-                        println!("expr acc - {}", acc);lambda_y(&mut acc, BinOp::Minus, e)})
+                     |e: Expr| lambda_y(&mut acc, BinOp::Minus, e))
                )
              ),
     || { return acc }
