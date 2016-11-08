@@ -1,4 +1,4 @@
-// Alex Ozdemir <aozdemir@hmc.edu> // <- Your name should replace this line!
+// Daniel Sonner
 // Starter code for HMC's MemorySafe, week 2
 //
 // The Read Evaluate Print Loop
