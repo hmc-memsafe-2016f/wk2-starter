@@ -5,6 +5,7 @@
 // terms of those operations.
 
 use std::cmp;
+use std::fmt;
 
 pub enum Expr {
     BinOp(Box<Expr>, BinOp, Box<Expr>),
@@ -16,6 +17,26 @@ pub enum BinOp {
     Minus,
     Times,
     Over,
+}
+
+impl fmt::Display for BinOp {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        match self {
+            &BinOp::Plus => write!(f, "+"),
+            &BinOp::Minus => write!(f, "-"),
+            &BinOp::Times => write!(f, "*"),
+            &BinOp::Over => write!(f, "/"),
+        }
+    }
+}
+
+impl fmt::Display for Expr {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        match self {
+            &Expr::BinOp(ref left, ref operation, ref right) => write!(f, "{} {} {}", left, operation, right),
+            &Expr::Literal(value) => write!(f, "{}", value),
+        }
+    }
 }
 
 impl Expr {

@@ -5,27 +5,32 @@
 
 use nom::digit;
 
+use expr::{Expr, BinOp};
 use std::str;
+use std::mem;
 use std::str::FromStr;
 
-named!(parens<i64>, delimited!(
+named!(parens<Expr>, delimited!(
     char!('('),
     expr,
     char!(')')
   )
 );
 
-named!(i64_literal<i64>,
-  map_res!(
+named!(i64_literal<Expr>,
+  map!(
     map_res!(
-      digit,
-      str::from_utf8
+      map_res!(
+        digit,
+        str::from_utf8
+      ),
+      FromStr::from_str
     ),
-    FromStr::from_str
+    Expr::Literal
   )
 );
 
-named!(factor<i64>,
+named!(factor<Expr>,
   alt!(
     i64_literal
   | parens
@@ -33,30 +38,46 @@ named!(factor<i64>,
 );
 
 // we define acc as mutable to update its value whenever a new term is found
-named!(term <i64>,
+named!(term <Expr>,
   chain!(
     mut acc: factor  ~
              many0!(
                alt!(
-                   tap!(mul: preceded!(tag!("*"), factor) => acc = acc * mul) |
-                   tap!(div: preceded!(tag!("/"), factor) => acc = acc / div)
-                //  tap!(mul: preceded!(tag!("*"), factor) => Expr::BinOp(Box::new(acc), BinOp::Times, Box::new(mul))) |
-                //  tap!(div: preceded!(tag!("/"), factor) => Expr::BinOp(Box::new(acc), BinOp::Over, Box::new(div)))
+                 map!(
+                     preceded!(tag!("*"), factor),
+                     |e: Expr| {
+                         let tmp = mem::replace(&mut acc, Expr::Literal(0));
+                         mem::replace(&mut acc, Expr::BinOp(Box::new(tmp), BinOp::Times, Box::new(e)));
+                     }) |
+                 map!(
+                     preceded!(tag!("/"), factor),
+                     |e: Expr| {
+                         let tmp = mem::replace(&mut acc, Expr::Literal(0));
+                         mem::replace(&mut acc, Expr::BinOp(Box::new(tmp), BinOp::Over, Box::new(e)));
+                     })
                )
              ),
     || { return acc }
   )
 );
 
-named!(pub expr <i64>,
+named!(pub expr <Expr>,
   chain!(
     mut acc: term  ~
              many0!(
                alt!(
-                   tap!(add: preceded!(tag!("+"), factor) => acc = acc + add) |
-                   tap!(sub: preceded!(tag!("-"), factor) => acc = acc - sub)
-                //  tap!(add: preceded!(tag!("+"), term) => Expr::BinOp(Box::new(acc), BinOp::Plus, Box::new(add))) |
-                //  tap!(sub: preceded!(tag!("-"), term) => Expr::BinOp(Box::new(acc), BinOp::Minus, Box::new(sub)))
+                 map!(
+                     preceded!(tag!("+"), factor),
+                     |e: Expr| {
+                         let tmp = mem::replace(&mut acc, Expr::Literal(0));
+                         mem::replace(&mut acc, Expr::BinOp(Box::new(tmp), BinOp::Plus, Box::new(e)));
+                     }) |
+                 map!(
+                     preceded!(tag!("-"), term),
+                     |e: Expr| {
+                         let tmp = mem::replace(&mut acc, Expr::Literal(0));
+                         mem::replace(&mut acc, Expr::BinOp(Box::new(tmp), BinOp::Minus, Box::new(e)));
+                     })
                )
              ),
     || { return acc }
