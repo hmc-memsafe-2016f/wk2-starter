@@ -9,3 +9,7 @@ nom = "^1.2.4"
 [[bin]]
 name = "repl"
 path = "src/repl.rs"
+
+[[bin]]
+name = "stat"
+path = "src/stat.rs"
