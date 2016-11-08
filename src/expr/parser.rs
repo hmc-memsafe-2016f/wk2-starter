@@ -1,9 +1,9 @@
-// Alex Ozdemir <aozdemir@hmc.edu> // <- Your name should replace this line!
-// Starter code for HMC's MemorySafe, week 2
+// Zach Hauser <zachary.hauser@pomona.edu>
+// Submission for HMC's MemorySafe, week 2
 //
-// The parser for an `Expr` (currently just produces the value fo the `Expr`)
+// The parser for an `Expr` 
 
-use nom::digit;
+use nom::{digit, multispace};
 
 use expr::Expr;
 use expr::BinOp;
@@ -11,9 +11,9 @@ use std::str;
 use std::str::FromStr;
 
 named!(parens<Expr>, delimited!(
-    char!('('),
+    preceded!(opt!(multispace), char!('(')),
     expr,
-    char!(')')
+    preceded!(opt!(multispace), char!(')'))
   )
 );
 
@@ -32,36 +32,49 @@ named!(i64_literal<Expr>,
 
 named!(factor<Expr>,
   alt!(
-    i64_literal
+    preceded!(opt!(multispace), i64_literal)
   | parens
   )
 );
 
-
 named!(term<Expr>,
-  alt!(
-    factor 
-  | chain!(
-      t: term ~ tag!("*") ~ f: factor, 
-      || {Expr::BinOp(Box::new(t), BinOp::Times, Box::new(f))}
-    )
-  | chain!(
-      t: term ~ tag!("/") ~ f: factor, 
-      || {Expr::BinOp(Box::new(t), BinOp::Over, Box::new(f))}
-    )
+  chain!(
+    initial: factor ~
+    result: fold_many0!(
+              alt!(
+                map!(
+                  preceded!(preceded!(opt!(multispace), tag!("*")), factor), 
+                  |fact| (BinOp::Times, fact)
+                )
+              | map!(
+                  preceded!(preceded!(opt!(multispace), tag!("/")), factor), 
+                  |fact| (BinOp::Over, fact)
+                )
+              ),
+              initial,
+              |e1, (op, e2)|  Expr::BinOp(Box::new(e1), op, Box::new(e2))
+            ), 
+    || { return result }
   )
 );
 
 named!(pub expr<Expr>,
-  alt!(
-    term 
-  | chain!(
-      e: expr ~ tag!("+") ~ t: term, 
-      || {Expr::BinOp(Box::new(e), BinOp::Plus, Box::new(t))}
-    )
-  | chain!(
-      e: expr ~ tag!("-") ~ t: term, 
-      || {Expr::BinOp(Box::new(e), BinOp::Minus, Box::new(t))}
-    )
+  chain!(
+    initial: term ~
+    result: fold_many0!(
+              alt!(
+                map!(
+                  preceded!(preceded!(opt!(multispace), tag!("+")), term), 
+                  |term| (BinOp::Plus, term)
+                )
+              | map!(
+                  preceded!(preceded!(opt!(multispace), tag!("-")), term), 
+                  |term| (BinOp::Minus, term)
+                )
+              ),
+              initial,
+              |e1, (op, e2)|  Expr::BinOp(Box::new(e1), op, Box::new(e2))
+            ), 
+    || { return result }
   )
 );

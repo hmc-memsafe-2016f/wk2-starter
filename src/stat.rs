@@ -1,7 +1,7 @@
 // Zach Hauser <zachary.hauser@pomona.edu>
 // Submission for HMC's MemorySafe, week 2
 //
-// The Read Evaluate Print Loop
+// The Read Evaluate Print Loop (modified to print statistics)
 
 #[macro_use]
 extern crate nom;
@@ -17,7 +17,7 @@ fn main() {
     while io::stdin().read_line(&mut line).map(|l| l > 0).unwrap_or(false) {
 
         match expr::parse(line.as_str().trim().as_bytes()) {
-            IResult::Done(ref rest, ref res) if rest.len() == 0 => println!("{}", res.evaluate()),
+            IResult::Done(ref rest, ref res) if rest.len() == 0 => println!("{} {} {}", res.evaluate(), res.depth(), res.operation_count()),
             _ => println!("Error"),
         }
 
