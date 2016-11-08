@@ -1,4 +1,4 @@
-// Alex Ozdemir <aozdemir@hmc.edu> // <- Your name should replace this line!
+// Luis Viornery <lviornery@hmc.edu>
 // Starter code for HMC's MemorySafe, week 2
 //
 // The module for the `Expr` representation of arithmetic expressions.
