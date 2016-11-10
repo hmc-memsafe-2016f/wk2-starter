@@ -41,21 +41,29 @@ named!(term <Expr>,
     mut acc: factor  ~
              many0!(
                alt!(
-                 tap!(mul: preceded!(tag!("*"), factor) => acc = acc * mul) |
-                 tap!(div: preceded!(tag!("/"), factor) => acc = acc / div)
+                 map!(preceded!(tag!("*"), factor), |mul| acc =
+                   Expr::BinOp(Box::new(mem::repalce(&mut acc, Expr::Literal(0))), BinOp::Times,
+                     Box::new(mul))) |
+                 map!(preceded!(tag!("/"), factor), |div| acc =
+                   Expr::BinOp(Box::new(mem::repalce(&mut acc, Expr::Literal(0))), BinOp::Over,
+                     Box::new(div)))
                )
              ),
     || { return acc }
   )
 );
 
-named!(pub expr <i64>,
+named!(pub expr <Expr>,
   chain!(
     mut acc: term  ~
              many0!(
                alt!(
-                 tap!(add: preceded!(tag!("+"), term) => acc = acc + add) |
-                 tap!(sub: preceded!(tag!("-"), term) => acc = acc - sub)
+                 map!(preceded!(tag!("+"), factor), |add| acc =
+                   Expr::BinOp(Box::new(mem::repalce(&mut acc, Expr::Literal(0))), BinOp::Plus,
+                     Box::new(add))) |
+                 map!(preceded!(tag!("/"), factor), |min| acc =
+                   Expr::BinOp(Box::new(mem::repalce(&mut acc, Expr::Literal(0))), BinOp::Minus,
+                     Box::new(min)))
                )
              ),
     || { return acc }
