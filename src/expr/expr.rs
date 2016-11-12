@@ -17,6 +17,7 @@ pub enum BinOp {
 }
 
 impl Expr {
+    /// Evalutes the arithmentic expression.
     pub fn evaluate(&self) -> isize {
         match *self {
             Expr::BinOp(ref x, BinOp::Plus,  ref y) => x.evaluate() + y.evaluate(),
