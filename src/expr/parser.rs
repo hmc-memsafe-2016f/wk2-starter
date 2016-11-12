@@ -43,10 +43,31 @@ named!(term <Expr>,
     mut acc: factor  ~
              many0!(
                alt!(
-                 //tap!(mul: preceded!(tag!("*"), factor) => acc = acc * mul) |
-                 tap!(mul: preceded!(tag!("*"), factor) => acc = Expr::Literal(4)) |
-                 //tap!(div: preceded!(tag!("/"), factor) => acc = acc / div) |
-                 tap!(div: preceded!(tag!("/"), factor) => acc = Expr::Literal(5))
+                 map!(preceded!(tag!("*"), term), |prod: Expr| {
+                     match acc {
+                         Expr::Literal(num) => {
+                           acc = Expr::BinOp(Box::new(Expr::Literal(num)), BinOp::Times, Box::new(prod));
+                         },
+                         Expr::BinOp(ref mut x, ref mut op, ref mut y) => {
+                             // swap out each of acc's values
+                             let xx = mem::replace(x, Box::new(prod));
+                             let oper = mem::replace(op, BinOp::Times);
+                             let yy = mem::replace(y, Box::new(Expr::Literal(0)));
+                             mem::replace(y, Box::new(Expr::BinOp(xx, oper, yy)));
+                         }
+                     }}) |
+                 map!(preceded!(tag!("/"), term), |div: Expr| {
+                     match acc {
+                         Expr::Literal(num) => {
+                           acc = Expr::BinOp(Box::new(Expr::Literal(num)), BinOp::Over, Box::new(div));
+                         },
+                         Expr::BinOp(ref mut x, ref mut op, ref mut y) => {
+                           let yy = mem::replace(x, Box::new(Expr::Literal(0)));
+                           let oper = mem::replace(op, BinOp::Over);
+                           let xx = mem::replace(y, Box::new(div));
+                           mem::replace(x, Box::new(Expr::BinOp(xx, oper, yy)));
+                         }
+                 }})
                )
              ),
     || { return acc }
@@ -57,11 +78,12 @@ named!(pub expr <Expr>,
   chain!(
     mut acc: term  ~
              many0!(
-               //alt!(
+               alt!(
                  map!(preceded!(tag!("+"), term), |add: Expr| {
                      match acc {
                          Expr::Literal(num) => {
-                           acc = Expr::BinOp(Box::new(Expr::Literal(num)), BinOp::Plus, Box::new(add));},
+                           acc = Expr::BinOp(Box::new(Expr::Literal(num)), BinOp::Plus, Box::new(add));
+                         },
                          Expr::BinOp(ref mut x, ref mut op, ref mut y) => {
                              // swap out each of acc's values
                              let xx = mem::replace(x, Box::new(add));
@@ -69,11 +91,20 @@ named!(pub expr <Expr>,
                              let yy = mem::replace(y, Box::new(Expr::Literal(0)));
                              mem::replace(y, Box::new(Expr::BinOp(xx, oper, yy)));
                          }
-                     }
-                 }) 
-                 //tap!(sub: preceded!(tag!("-"), term) => acc = acc - sub)
-                 //tap!(sub: preceded!(tag!("-"), term) => acc = Expr::Literal(3))
-               //)
+                     }}) |
+                 map!(preceded!(tag!("-"), term), |sub: Expr| {
+                     match acc {
+                         Expr::Literal(num) => {
+                           acc = Expr::BinOp(Box::new(Expr::Literal(num)), BinOp::Minus, Box::new(sub));
+                         },
+                         Expr::BinOp(ref mut x, ref mut op, ref mut y) => {
+                           let yy = mem::replace(x, Box::new(Expr::Literal(0)));
+                           let oper = mem::replace(op, BinOp::Minus);
+                           let xx = mem::replace(y, Box::new(sub));
+                           mem::replace(x, Box::new(Expr::BinOp(xx, oper, yy)));
+                         }
+                 }})
+               )
              ),
     || { return acc }
   )
