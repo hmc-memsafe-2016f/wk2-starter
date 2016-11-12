@@ -65,7 +65,7 @@ named!(term <Expr>,
                            let inner_x = mem::replace(x, Box::new(Expr::Literal(0)));
                            let inner_op = mem::replace(op, BinOp::Over);
                            let inner_y = mem::replace(y, Box::new(div));
-                           mem::replace(y, Box::new(Expr::BinOp(inner_x, inner_op, inner_y)));
+                           mem::replace(x, Box::new(Expr::BinOp(inner_x, inner_op, inner_y)));
                          }
                  }})
                )
