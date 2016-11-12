@@ -30,13 +30,19 @@ impl Expr {
     /// Computes the number of binary operations.
     /// For example, `1+4-5` has two operations.
     pub fn operation_count(&self) -> usize {
-        unimplemented!()
+        match *self {
+            Expr::Literal(_) => 0,
+            Expr::BinOp(ref x, _, ref y) => 1 + x.operation_count() + y.operation_count()
+        }
     }
 
     /// The depth, defined as `max{ # of operations from root to leaf }`.
     /// `1` has depth 0, `1+3` has depth 1, and `1+4*3` has depth 2
     pub fn depth(&self) -> usize {
-        unimplemented!()
+        match *self {
+            Expr::Literal(_) => 0,
+            Expr::BinOp(ref x, _, ref y) => 1 + 
+        }
     }
 }
 
