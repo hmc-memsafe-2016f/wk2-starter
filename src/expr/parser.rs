@@ -4,10 +4,12 @@
 // The parser for an `Expr` (currently just produces the value fo the `Expr`)
 
 use expr::Expr;
+use expr::BinOp;
 
 use nom::digit;
 
 use std::str;
+use std::mem;
 use std::str::FromStr;
 
 named!(parens<Expr>, delimited!(
@@ -55,12 +57,23 @@ named!(pub expr <Expr>,
   chain!(
     mut acc: term  ~
              many0!(
-               alt!(
-                 //tap!(add: preceded!(tag!("+"), term) => acc = acc + add) |
-                 tap!(add: preceded!(tag!("+"), term) => acc = Expr::Literal(2)) |
+               //alt!(
+                 map!(preceded!(tag!("+"), term), |add: Expr| {
+                     match acc {
+                         Expr::Literal(num) => {
+                           acc = Expr::BinOp(Box::new(Expr::Literal(num)), BinOp::Plus, Box::new(add));},
+                         Expr::BinOp(ref mut x, ref mut op, ref mut y) => {
+                             // swap out each of acc's values
+                             let xx = mem::replace(x, Box::new(add));
+                             let oper = mem::replace(op, BinOp::Plus);
+                             let yy = mem::replace(y, Box::new(Expr::Literal(0)));
+                             mem::replace(y, Box::new(Expr::BinOp(xx, oper, yy)));
+                         }
+                     }
+                 }) 
                  //tap!(sub: preceded!(tag!("-"), term) => acc = acc - sub)
-                 tap!(sub: preceded!(tag!("-"), term) => acc = Expr::Literal(3))
-               )
+                 //tap!(sub: preceded!(tag!("-"), term) => acc = Expr::Literal(3))
+               //)
              ),
     || { return acc }
   )
