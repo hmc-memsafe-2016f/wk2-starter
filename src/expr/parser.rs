@@ -50,10 +50,10 @@ named!(term <Expr>,
                          },
                          Expr::BinOp(ref mut x, ref mut op, ref mut y) => {
                              // swap out each of acc's values
-                             let xx = mem::replace(x, Box::new(prod));
-                             let oper = mem::replace(op, BinOp::Times);
-                             let yy = mem::replace(y, Box::new(Expr::Literal(0)));
-                             mem::replace(y, Box::new(Expr::BinOp(xx, oper, yy)));
+                             let inner_x = mem::replace(x, Box::new(prod));
+                             let inner_op = mem::replace(op, BinOp::Times);
+                             let inner_y = mem::replace(y, Box::new(Expr::Literal(0)));
+                             mem::replace(y, Box::new(Expr::BinOp(inner_x, inner_op, inner_y)));
                          }
                      }}) |
                  map!(preceded!(tag!("/"), term), |div: Expr| {
@@ -62,10 +62,10 @@ named!(term <Expr>,
                            acc = Expr::BinOp(Box::new(Expr::Literal(num)), BinOp::Over, Box::new(div));
                          },
                          Expr::BinOp(ref mut x, ref mut op, ref mut y) => {
-                           let yy = mem::replace(x, Box::new(Expr::Literal(0)));
-                           let oper = mem::replace(op, BinOp::Over);
-                           let xx = mem::replace(y, Box::new(div));
-                           mem::replace(x, Box::new(Expr::BinOp(xx, oper, yy)));
+                           let inner_x = mem::replace(x, Box::new(Expr::Literal(0)));
+                           let inner_op = mem::replace(op, BinOp::Over);
+                           let inner_y = mem::replace(y, Box::new(div));
+                           mem::replace(y, Box::new(Expr::BinOp(inner_x, inner_op, inner_y)));
                          }
                  }})
                )
@@ -86,10 +86,10 @@ named!(pub expr <Expr>,
                          },
                          Expr::BinOp(ref mut x, ref mut op, ref mut y) => {
                              // swap out each of acc's values
-                             let xx = mem::replace(x, Box::new(add));
-                             let oper = mem::replace(op, BinOp::Plus);
-                             let yy = mem::replace(y, Box::new(Expr::Literal(0)));
-                             mem::replace(y, Box::new(Expr::BinOp(xx, oper, yy)));
+                             let inner_x = mem::replace(x, Box::new(add));
+                             let inner_op = mem::replace(op, BinOp::Plus);
+                             let inner_y = mem::replace(y, Box::new(Expr::Literal(0)));
+                             mem::replace(y, Box::new(Expr::BinOp(inner_x, inner_op, inner_y)));
                          }
                      }}) |
                  map!(preceded!(tag!("-"), term), |sub: Expr| {
@@ -98,10 +98,10 @@ named!(pub expr <Expr>,
                            acc = Expr::BinOp(Box::new(Expr::Literal(num)), BinOp::Minus, Box::new(sub));
                          },
                          Expr::BinOp(ref mut x, ref mut op, ref mut y) => {
-                           let yy = mem::replace(x, Box::new(Expr::Literal(0)));
-                           let oper = mem::replace(op, BinOp::Minus);
-                           let xx = mem::replace(y, Box::new(sub));
-                           mem::replace(x, Box::new(Expr::BinOp(xx, oper, yy)));
+                           let inner_y = mem::replace(y, Box::new(sub));
+                           let inner_op = mem::replace(op, BinOp::Minus);
+                           let inner_x = mem::replace(x, Box::new(Expr::Literal(0)));
+                           mem::replace(x, Box::new(Expr::BinOp(inner_x, inner_op, inner_y)));
                          }
                  }})
                )
