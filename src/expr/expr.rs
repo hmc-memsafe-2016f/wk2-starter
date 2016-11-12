@@ -18,7 +18,13 @@ pub enum BinOp {
 
 impl Expr {
     pub fn evaluate(&self) -> isize {
-        42
+        match *self {
+            Expr::BinOp(ref x, BinOp::Plus,  ref y) => x.evaluate() + y.evaluate(),
+            Expr::BinOp(ref x, BinOp::Minus, ref y) => x.evaluate() - y.evaluate(),
+            Expr::BinOp(ref x, BinOp::Times, ref y) => x.evaluate() * y.evaluate(),
+            Expr::BinOp(ref x, BinOp::Over,  ref y) => x.evaluate() / y.evaluate(),
+            Expr::Literal(num) => num
+        }
     }
 
     /// Computes the number of binary operations.
