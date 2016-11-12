@@ -18,7 +18,8 @@ fn main() {
 
         match expr::parse(line.as_str().trim().as_bytes()) {
             IResult::Done(rest, ref res) if rest.len() == 0 =>
-                println!("{} {} {}", res.evaluate(), res.depth(), res.operation_count()),
+                println!("{} {} {}", res.evaluate(), res.depth(),
+                         res.operation_count()),
             _ => println!("Error"),
         }
 
