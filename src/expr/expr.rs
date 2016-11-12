@@ -39,9 +39,10 @@ impl Expr {
     /// The depth, defined as `max{ # of operations from root to leaf }`.
     /// `1` has depth 0, `1+3` has depth 1, and `1+4*3` has depth 2
     pub fn depth(&self) -> usize {
+        use std::cmp;
         match *self {
             Expr::Literal(_) => 0,
-            Expr::BinOp(ref x, _, ref y) => 1 + 
+            Expr::BinOp(ref x, _, ref y) => 1 + cmp::max(x.depth(), y.depth())
         }
     }
 }
