@@ -4,11 +4,13 @@
 // The definition of `Expr`, a type that represents arithmetic expressions involving +,-,*,/, in
 // terms of those operations.
 
+#[derive(Debug)]
 pub enum Expr {
     BinOp(Box<Expr>, BinOp, Box<Expr>),
     Literal(isize),
 }
 
+#[derive(Debug)]
 pub enum BinOp {
     Plus,
     Minus,
