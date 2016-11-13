@@ -1,5 +1,4 @@
-// Alex Ozdemir <aozdemir@hmc.edu> // <- Your name should replace this line!
-// Starter code for HMC's MemorySafe, week 2
+// Jackson Warley
 //
 // The definition of `RExpr` (ReducedExpr), a type that represents arithmetic expressions involving
 // +,-,*,/, in terms of Addition, Multiplication, Negation, and Reciprocal

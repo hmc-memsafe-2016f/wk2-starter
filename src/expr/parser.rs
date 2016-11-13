@@ -1,21 +1,22 @@
-// Alex Ozdemir <aozdemir@hmc.edu> // <- Your name should replace this line!
-// Starter code for HMC's MemorySafe, week 2
+// Jackson Warley
 //
-// The parser for an `Expr` (currently just produces the value fo the `Expr`)
+// The parser for an `Expr`
 
 use nom::digit;
-
 use std::str;
 use std::str::FromStr;
+use std::mem;
+use expr::Expr;
+use expr::BinOp;
 
-named!(parens<i64>, delimited!(
+named!(parens<Expr>, delimited!(
     char!('('),
     expr,
     char!(')')
   )
 );
 
-named!(i64_literal<i64>,
+named!(isize_digit<isize>,
   map_res!(
     map_res!(
       digit,
@@ -25,34 +26,85 @@ named!(i64_literal<i64>,
   )
 );
 
-named!(factor<i64>,
+named!(literal<Expr>,
+  map!(
+    isize_digit,
+    Expr::Literal
+  )
+);
+
+named!(factor<Expr>,
   alt!(
-    i64_literal
+    literal
   | parens
   )
 );
 
-// we define acc as mutable to update its value whenever a new term is found
-named!(term <i64>,
+named!(term <Expr>,
   chain!(
-    mut acc: factor  ~
+    mut acc: factor ~
              many0!(
                alt!(
-                 tap!(mul: preceded!(tag!("*"), factor) => acc = acc * mul) |
-                 tap!(div: preceded!(tag!("/"), factor) => acc = acc / div)
+                 map!(preceded!(tag!("*"), factor),
+                      |mul| { match acc {
+                          Expr::Literal(x) => acc =
+                              Expr::BinOp(Box::new(Expr::Literal(x)), BinOp::Times, Box::new(mul)),
+                          Expr::BinOp(ref mut left, ref mut op, ref mut right) => {
+                              let temp = Expr::Literal(0);
+                              let l = mem::replace(left, Box::new(temp));
+                              let r = mem::replace(right, Box::new(mul));
+                              let o = mem::replace(op, BinOp::Times);
+                              mem::replace(left, Box::new(Expr::BinOp(l, o, r)));
+                          }
+                      }}) |
+                 map!(preceded!(tag!("/"), factor),
+                      |div| { match acc {
+                          Expr::Literal(x) => acc =
+                              Expr::BinOp(Box::new(Expr::Literal(x)), BinOp::Over, Box::new(div)),
+                          Expr::BinOp(ref mut left, ref mut op, ref mut right) => {
+                              let temp = Expr::Literal(0);
+                              let l = mem::replace(left, Box::new(temp));
+                              let r = mem::replace(right, Box::new(div));
+                              let o = mem::replace(op, BinOp::Over);
+                              mem::replace(left, Box::new(Expr::BinOp(l, o, r)));
+                          }
+                      }})
                )
              ),
-    || { return acc }
+      || { return acc }
   )
 );
 
-named!(pub expr <i64>,
+
+named!(pub expr <Expr>,
   chain!(
-    mut acc: term  ~
+    mut acc: term ~
              many0!(
                alt!(
-                 tap!(add: preceded!(tag!("+"), term) => acc = acc + add) |
-                 tap!(sub: preceded!(tag!("-"), term) => acc = acc - sub)
+                 map!(preceded!(tag!("+"), term),
+                      |add| { match acc {
+                          Expr::Literal(x) => acc =
+                              Expr::BinOp(Box::new(Expr::Literal(x)), BinOp::Plus, Box::new(add)),
+                          Expr::BinOp(ref mut left, ref mut op, ref mut right) => {
+                              let temp = Expr::Literal(0);
+                              let l = mem::replace(left, Box::new(temp));
+                              let r = mem::replace(right, Box::new(add));
+                              let o = mem::replace(op, BinOp::Plus);
+                              mem::replace(left, Box::new(Expr::BinOp(l, o, r)));
+                          }
+                      }}) |
+                 map!(preceded!(tag!("-"), term),
+                      |sub| { match acc {
+                          Expr::Literal(x) => acc =
+                              Expr::BinOp(Box::new(Expr::Literal(x)), BinOp::Minus, Box::new(sub)),
+                          Expr::BinOp(ref mut left, ref mut op, ref mut right) => {
+                              let temp = Expr::Literal(0);
+                              let l = mem::replace(left, Box::new(temp));
+                              let r = mem::replace(right, Box::new(sub));
+                              let o = mem::replace(op, BinOp::Minus);
+                              mem::replace(left, Box::new(Expr::BinOp(l, o, r)));
+                          }
+                      }})
                )
              ),
     || { return acc }
