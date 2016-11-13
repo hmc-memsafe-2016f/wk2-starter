@@ -5,15 +5,15 @@
 
 use super::{Expr, BinOp};
 
-use nom::digit;
+use nom::{digit,multispace};
 
 use std::str;
 use std::str::FromStr;
 
 named!(parens<Expr>, delimited!(
-    char!('('),
-    expr,
-    char!(')')
+    preceded!(opt!(multispace), char!('(')),
+    expr_no_trailing_space,
+    preceded!(opt!(multispace), char!(')'))
   )
 );
 
@@ -21,7 +21,7 @@ named!(isize_literal<Expr>,
   map!(
     map_res!(
       map_res!(
-        digit,
+        preceded!(opt!(multispace), digit),
         str::from_utf8
       ),
       FromStr::from_str
@@ -43,9 +43,9 @@ named!(term <Expr>,
     mut acc: factor  ~
              many0!(
                alt!(
-                 map!(preceded!(tag!("*"), factor),
+                 map!(preceded!(preceded!(opt!(multispace), tag!("*")), factor),
                       |mul| acc.do_op(BinOp::Times, mul)) |
-                 map!(preceded!(tag!("/"), factor),
+                 map!(preceded!(preceded!(opt!(multispace), tag!("/")), factor),
                       |div| acc.do_op(BinOp::Over, div))
                )
              ),
@@ -53,17 +53,21 @@ named!(term <Expr>,
   )
 );
 
-named!(pub expr <Expr>,
+named!(expr_no_trailing_space <Expr>,
   chain!(
     mut acc: term  ~
              many0!(
                alt!(
-                 map!(preceded!(tag!("+"), term),
+                 map!(preceded!(preceded!(opt!(multispace),tag!("+")), term),
                       |add| acc.do_op(BinOp::Plus, add)) |
-                 map!(preceded!(tag!("-"), term),
+                 map!(preceded!(preceded!(opt!(multispace),tag!("-")), term),
                       |sub| acc.do_op(BinOp::Minus, sub))
                )
              ),
     || { return acc }
   )
+);
+
+named!(pub expr<Expr>,
+  terminated!(expr_no_trailing_space, opt!(multispace))
 );
