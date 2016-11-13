@@ -1,7 +1,7 @@
 // Michael Sheely <msheely@hmc.edu>
-// Starter code for HMC's MemorySafe, week 2
+// Implements the statistics printing for HMC's MemorySafe, week 2
 //
-// The Read Evaluate Print Loop
+// The prints statistics for an expression withing a Read Evaluate Print Loop
 
 #[macro_use]
 extern crate nom;
@@ -18,7 +18,8 @@ fn main() {
 
         match expr::parse(line.as_str().trim().as_bytes()) {
             IResult::Done(rest, ref res) if rest.len() == 0 =>
-                println!("{}", res.evaluate()),
+                println!("{} {} {}", res.evaluate(), res.depth(),
+                         res.operation_count()),
             _ => println!("Error"),
         }
 
